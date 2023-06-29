@@ -1,0 +1,54 @@
+version: '3.1'
+services:
+  sisfundapoio3-db:
+    container_name: sisfundapoio3_db
+    image: postgres
+    environment:
+      POSTGRES_DB: 'dbsisfundapoio3'
+      POSTGRES_PASSWORD: 'Mec_2022'
+      POSTGRES_USER: 'dbsisfundapoio3'
+    ports:
+      - '5432:5433'
+    volumes:
+      - ./db/sisfundapoio3/pgdata:/var/lib/postgresql
+    networks:
+      - sisfundapoio3
+
+  sisfundapoio3-api:
+    container_name: sisfundapoio3_api
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    ports:
+      - 7080:80
+    environment:
+      APP_ENV: 'local'
+      APP_DEBUG: 'true'
+      APP_URL: 'http://localhost:7080'
+      APP_VER: '1.0.0'
+      DATABASE_DRIVER: 'pdo_pgsql'
+      DATABASE_HOST: 'dsvpostgresql01'
+      DATABASE_PORT: '5202'
+      DATABASE_NAME: 'dbsisfundapoio3'
+      DATABASE_USER: 'dbsisfundapoio3'
+      DATABASE_PASSWORD: 'Mec_2022'
+      REDIRECT_URI: 'http://localhost:7080/api'
+      URL_PROVIDER: 'https://sso.staging.acesso.gov.br'
+      CLIENT_ID: 'dsv-sisfundapoio3.container.mec.br' 
+      SECRET: '42a8d57b-3243-4780-b4e8-c58f5bfb5976'
+      SCOPE: 'openid+email+phone+profile' 
+      URL_SERVICO: 'https://api.staging.acesso.gov.br'
+      NONCE: '3ed8657fd74c' 
+      GRANT_TYPE: 'authorization_code'
+      URL_LOGOUT: 'https://sso.staging.acesso.gov.br/logout'
+      restart: always
+    volumes:
+      - ./api:/var/www/html
+    depends_on:
+      - sisfundapoio3-db
+    networks:
+      - sisfundapoio3
+
+networks:
+  sisfundapoio3:
+    driver: bridge
